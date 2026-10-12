@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build / Cloudflare
+.wrangler/
+dist/
+.pages/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+.dev.vars
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Optional
+package-lock.json
