@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenRouter Chat · Cloudflare Pages</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            surface: {
+              main: 'var(--surface-main)',
+              card: 'var(--surface-card)',
+              hover: 'var(--surface-hover)',
+            },
+            border: {
+              default: 'var(--border-default)',
+            },
+            text: {
+              primary: 'var(--text-primary)',
+              secondary: 'var(--text-secondary)',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      /* Light theme (Dojo-inspired) */
+      --surface-main: #e8eaed;
+      --surface-card: #ffffff;
+      --surface-hover: #f1f3f7;
+      --border-default: #e4e7ec;
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+      --accent: #0f172a;
+      --accent-hover: #1e293b;
+      --msg-user-bg: #f3f4f6;           /* same light gray as agent */
+      --msg-user-text: #111827;         /* dark text so it’s readable */
+      --msg-assistant-bg: #f3f4f6;
+      --msg-assistant-border: #e5e7eb;
+      --input-bg: #ffffff;
+    }
+
+.dark {
+  --surface-main: #111111;          /* pure pitch black */
+  --surface-card: #000000;          /* near-black card */
+  --surface-hover: #1a1a1a;         /* dark gray hover */
+  --border-default: #2a2a2a;        /* subtle dark border */
+  --text-primary: #e5e5e5;          /* soft white */
+  --text-secondary: #888888;        /* medium gray */
+  --accent: #e5e5e5;
+  --accent-hover: #ffffff;
+  --msg-user-bg: #2a2a2a;           /* dark gray bubble */
+  --msg-user-text: #ffffff;
+  --msg-assistant-bg: #161616;      /* slightly lighter than card */
+  --msg-assistant-border: #2a2a2a;
+  --input-bg: #161616;
+}
+
+    body {
+      background: var(--surface-main);
+      color: var(--text-primary);
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    .card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-default);
+      border-radius: 16px;
+    }
+
+    .msg-user {
+      background: var(--msg-user-bg);
+      color: var(--msg-user-text);
+    }
+
+    .msg-assistant {
+      background: var(--msg-assistant-bg);
+      border: 1px solid var(--msg-assistant-border);
+      color: var(--text-primary);
+    }
+
+    #messages {
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-default) transparent;
+    }
+
+    #input {
+      font-size: 1.05rem; /* bigger font */
+      line-height: 1.5;
+    }
+
+  </style>
+</head>
+<body class="h-screen flex overflow-hidden p-3 gap-3">
+
+  <!-- ===== INFO SECTION (left card) ===== -->
+  <aside class="w-full md:w-2/5 flex-shrink-0 card flex flex-col overflow-hidden">
+    <div class="p-5 border-b border-[var(--border-default)] flex items-center justify-between">
+      <div>
+        <h1 class="text-lg font-semibold text-[var(--text-primary)]">OpenRouter Chat</h1>
+        <p class="text-xs text-[var(--text-secondary)] mt-0.5">Cloudflare Pages</p>
+      </div>
+	<!-- Theme toggle - circle with sun / moon -->
+	<button id="themeToggle"
+	  class="w-9 h-9 rounded-full border border-[var(--border-default)]
+		 bg-[var(--surface-hover)] flex items-center justify-center
+		 hover:bg-[var(--border-default)] transition"
+	  title="Toggle light / dark">
+	  <!-- Sun (shown in dark mode) -->
+	  <svg id="icon-sun" class="w-4 h-4 hidden dark:block" xmlns="http://www.w3.org/2000/svg"
+	       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+	       stroke-linecap="round" stroke-linejoin="round">
+	    <circle cx="12" cy="12" r="4"/>
+	    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+	  </svg>
+	  <!-- Moon (shown in light mode) -->
+	  <svg id="icon-moon" class="w-4 h-4 block dark:hidden" xmlns="http://www.w3.org/2000/svg"
+	       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+	       stroke-linecap="round" stroke-linejoin="round">
+	    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+	  </svg>
+	</button>
+    </div>
+
+    <div class="p-5 space-y-6 flex-1 overflow-y-auto">
+      <!-- Model selector -->
+      <div class="space-y-2">
+        <label class="text-[10px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+          Model
+        </label>
+        <select id="model"
+          class="w-full rounded-xl border border-[var(--border-default)] bg-[var(--input-bg)]
+                 px-3 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-blue-500/40">
+          <option value="nvidia/nemotron-3-ultra-550b-a55b:free">Nemotron 3 Ultra 550B (free)</option>
+          <option value="thinkingmachines/inkling:free">Inkling (free)</option>
+          <option value="poolside/laguna-s-2.1:free">Laguna S 2.1 (free)</option>
+          <option value="nvidia/nemotron-3.5-lightning:free">Nemotron 3.5 Lightning (free)</option>
+          <option value="cohere/north-mini-code:free">North Mini Code (free)</option>
+        </select>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="space-y-2">
+        <label class="text-[10px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+          Quick actions
+        </label>
+        <div class="space-y-1.5">
+          <button onclick="sendSuggestion('Change the background to a soft blue gradient')"
+            class="w-full text-left text-sm px-3 py-2.5 rounded-xl
+                   hover:bg-[var(--surface-hover)] text-[var(--text-primary)] transition">
+            Change background
+          </button>
+          <button onclick="sendSuggestion('Write a short sonnet about AI')"
+            class="w-full text-left text-sm px-3 py-2.5 rounded-xl
+                   hover:bg-[var(--surface-hover)] text-[var(--text-primary)] transition">
+            Generate sonnet
+          </button>
+          <button onclick="sendSuggestion('Explain quantum computing in simple terms')"
+            class="w-full text-left text-sm px-3 py-2.5 rounded-xl
+                   hover:bg-[var(--surface-hover)] text-[var(--text-primary)] transition">
+            Explain quantum computing
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-5 border-t border-[var(--border-default)] text-xs text-[var(--text-secondary)] space-y-1">
+      <p>Key stays on Cloudflare only.</p>
+      <p>Streaming via Server-Sent Events.</p>
+    </div>
+  </aside>
+
+  <!-- ===== CHAT SECTION (right card) ===== -->
+  <main class="w-full md:w-3/5 card flex flex-col min-w-0 overflow-hidden">
+    <!-- Messages -->
+<div id="messages" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
+
+<!-- Input bar – no separator line, ~16% height -->
+<div class="h-[16%] min-h-[80px] p-4 flex items-center">
+  <form id="form" class="w-full max-w-3xl mx-auto relative">
+    <input
+      id="input"
+      type="text"
+      placeholder="Type a message…"
+      autocomplete="off"
+      class="w-full h-14 rounded-2xl border-2 border-[var(--border-default)]
+             bg-[var(--input-bg)] text-[var(--text-primary)]
+             pl-5 pr-14 text-[1.05rem]
+             focus:outline-none focus:ring-2 focus:ring-blue-500/40
+             placeholder:text-[var(--text-secondary)]"
+    />
+
+    <!-- Send button inside the input -->
+    <button
+      type="submit"
+      class="absolute right-2 top-1/2 -translate-y-1/2
+             w-10 h-10 rounded-full flex items-center justify-center
+             transition disabled:opacity-50
+             bg-white text-gray-500 border border-gray-200
+             dark:bg-[#2a2a2a] dark:text-white dark:border-[#3a3a3a]
+             hover:bg-gray-50 dark:hover:bg-[#3a3a3a]"
+      title="Send"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 19V5M5 12l7-7 7 7"/>
+      </svg>
+    </button>
+  </form>
+</div>
+
+  </main>
+
+  <script>
+    // ---------- Theme ----------
+    const html = document.documentElement;
+    const themeToggle = document.getElementById("themeToggle");
+
+    // Load saved theme
+    const saved = localStorage.getItem("theme");
+    if (saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      html.classList.add("dark");
+      html.classList.remove("light");
+    }
+
+    themeToggle.addEventListener("click", () => {
+      const isDark = html.classList.toggle("dark");
+      html.classList.toggle("light", !isDark);
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+
+    // ---------- Chat ----------
+    const messagesEl = document.getElementById("messages");
+    const form = document.getElementById("form");
+    const input = document.getElementById("input");
+    const modelSelect = document.getElementById("model");
+
+    let history = [
+      {
+        role: "system",
+        content: "You are a helpful assistant. Prefer concise answers. If the user asks to change the background, reply with a CSS background value (e.g. linear-gradient(...)) and the UI will apply it."
+      }
+    ];
+
+function addMessage(role, content) {
+  const wrapper = document.createElement("div");
+  wrapper.className = `flex ${role === "user" ? "justify-end" : "justify-start"}`;
+
+  const div = document.createElement("div");
+  div.className = `max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+    role === "user" ? "msg-user" : "msg-assistant"
+  }`;
+  div.textContent = content;
+
+  wrapper.appendChild(div);
+  messagesEl.appendChild(wrapper);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return div;
+}
+
+
+
+    function sendSuggestion(text) {
+      input.value = text;
+      form.dispatchEvent(new Event("submit"));
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = "";
+      input.disabled = true;
+
+      history.push({ role: "user", content: text });
+      addMessage("user", text);
+
+      const assistantDiv = addMessage("assistant", "…");
+      let full = "";
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: history,
+            model: modelSelect.value,
+            stream: true,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          assistantDiv.textContent = "Error: " + (err.error || res.statusText);
+          return;
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const data = line.slice(6).trim();
+              if (data === "[DONE]") continue;
+              try {
+                const json = JSON.parse(data);
+                const delta = json.choices?.[0]?.delta?.content || "";
+                if (delta) {
+                  full += delta;
+                  assistantDiv.textContent = full;
+                  messagesEl.scrollTop = messagesEl.scrollHeight;
+                }
+              } catch {}
+            }
+          }
+        }
+
+        history.push({ role: "assistant", content: full });
+
+        // Simple background-change detection
+        if (/background|gradient|color/i.test(text) &&
+            /linear-gradient|radial-gradient|#[0-9a-f]{3,8}|rgb|hsl/i.test(full)) {
+          const match = full.match(/(linear-gradient\([^)]+\)|radial-gradient\([^)]+\)|#[0-9a-fA-F]{3,8}|rgb[a]?\([^)]+\)|hsl[a]?\([^)]+\))/);
+          if (match) {
+            document.body.style.background = match[0];
+          }
+        }
+      } catch (err) {
+        assistantDiv.textContent = "Network error: " + err.message;
+      } finally {
+        input.disabled = false;
+        input.focus();
+      }
+    });
+  </script>
+</body>
+</html>
