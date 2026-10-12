@@ -1,64 +1,50 @@
-interface Env {
-  OPENROUTER_API_KEY: string;
-  DEFAULT_MODEL?: string;
-}
+// functions/api/chat.ts
+import { ChatOpenAI } from "@langchain/openai";
+import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 
-export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const { request, env } = context;
 
-  if (!env.OPENROUTER_API_KEY) {
-    return new Response(JSON.stringify({ error: "OPENROUTER_API_KEY not set" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+export const onRequestPost: PagesFunction<{ OPENROUTER_API_KEY: string }> = async (ctx) => {
+  const { messages } = await ctx.request.json();
 
-  try {
-    const body = await request.json() as {
-      messages: Array<{ role: string; content: string }>;
-      model?: string;
-      stream?: boolean;
-    };
+  const model = new ChatOpenAI({
+    model: ctx.env.DEFAULT_MODEL, // or any OpenRouter model
+    apiKey: ctx.env.OPENROUTER_API_KEY,
+    configuration: {
+      baseURL: "https://openrouter.ai/api/v1",
+    },
+    streaming: true,
+  });
 
-    const model = body.model || env.DEFAULT_MODEL || "openai/gpt-4o-mini";
-    const stream = body.stream !== false; // default true
+  // Simple chain / agent logic here
+  const stream = await model.stream([
+    new SystemMessage("You are a helpful assistant."),
+    ...messages.map((m: any) =>
+      m.role === "user" ? new HumanMessage(m.content) : m
+    ),
+  ]);
 
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": new URL(request.url).origin,
-        "X-Title": "Cloudflare OpenRouter Chat",
-      },
-      body: JSON.stringify({
-        model,
-        messages: body.messages,
-        stream,
-        temperature: 0.7,
-      }),
-    });
+  // Convert LangChain stream → SSE for your frontend
+  const { readable, writable } = new TransformStream();
+  const writer = writable.getWriter();
+  const encoder = new TextEncoder();
 
-    if (!response.ok) {
-      const err = await response.text();
-      return new Response(JSON.stringify({ error: err }), {
-        status: response.status,
-        headers: { "Content-Type": "application/json" },
-      });
+  (async () => {
+    for await (const chunk of stream) {
+      const text = chunk.content?.toString() || "";
+      if (text) {
+        await writer.write(encoder.encode(`data: ${JSON.stringify({
+          choices: [{ delta: { content: text } }]
+        })}\n\n`));
+      }
     }
+    await writer.write(encoder.encode("data: [DONE]\n\n"));
+    await writer.close();
+  })();
 
-    // Stream the response directly to the client
-    return new Response(response.body, {
-      headers: {
-        "Content-Type": stream ? "text/event-stream" : "application/json",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-      },
-    });
-  } catch (e: any) {
-    return new Response(JSON.stringify({ error: e.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  return new Response(readable, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+    },
+  });
 };
