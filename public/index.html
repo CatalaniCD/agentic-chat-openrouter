@@ -46,21 +46,21 @@
       --input-bg: #ffffff;
     }
 
-.dark {
-  --surface-main: #111111;          /* pure pitch black */
-  --surface-card: #000000;          /* near-black card */
-  --surface-hover: #1a1a1a;         /* dark gray hover */
-  --border-default: #2a2a2a;        /* subtle dark border */
-  --text-primary: #e5e5e5;          /* soft white */
-  --text-secondary: #888888;        /* medium gray */
-  --accent: #e5e5e5;
-  --accent-hover: #ffffff;
-  --msg-user-bg: #2a2a2a;           /* dark gray bubble */
-  --msg-user-text: #ffffff;
-  --msg-assistant-bg: #161616;      /* slightly lighter than card */
-  --msg-assistant-border: #2a2a2a;
-  --input-bg: #161616;
-}
+    .dark {
+      --surface-main: #111111;          /* pure pitch black */
+      --surface-card: #000000;          /* near-black card */
+      --surface-hover: #1a1a1a;         /* dark gray hover */
+      --border-default: #2a2a2a;        /* subtle dark border */
+      --text-primary: #e5e5e5;          /* soft white */
+      --text-secondary: #888888;        /* medium gray */
+      --accent: #e5e5e5;
+      --accent-hover: #ffffff;
+      --msg-user-bg: #2a2a2a;           /* dark gray bubble */
+      --msg-user-text: #ffffff;
+      --msg-assistant-bg: #161616;      /* slightly lighter than card */
+      --msg-assistant-border: #2a2a2a;
+      --input-bg: #161616;
+    }
 
     body {
       background: var(--surface-main);
@@ -94,7 +94,6 @@
       font-size: 1.05rem; /* bigger font */
       line-height: 1.5;
     }
-
   </style>
 </head>
 <body class="h-screen flex overflow-hidden p-3 gap-3">
@@ -106,62 +105,63 @@
         <h1 class="text-lg font-semibold text-[var(--text-primary)]">OpenRouter Chat</h1>
         <p class="text-xs text-[var(--text-secondary)] mt-0.5">Cloudflare Pages</p>
       </div>
-	<!-- Theme toggle - circle with sun / moon -->
-	<button id="themeToggle"
-	  class="w-9 h-9 rounded-full border border-[var(--border-default)]
-		 bg-[var(--surface-hover)] flex items-center justify-center
-		 hover:bg-[var(--border-default)] transition"
-	  title="Toggle light / dark">
-	  <!-- Sun (shown in dark mode) -->
-	  <svg id="icon-sun" class="w-4 h-4 hidden dark:block" xmlns="http://www.w3.org/2000/svg"
-	       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-	       stroke-linecap="round" stroke-linejoin="round">
-	    <circle cx="12" cy="12" r="4"/>
-	    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-	  </svg>
-	  <!-- Moon (shown in light mode) -->
-	  <svg id="icon-moon" class="w-4 h-4 block dark:hidden" xmlns="http://www.w3.org/2000/svg"
-	       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-	       stroke-linecap="round" stroke-linejoin="round">
-	    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-	  </svg>
-	</button>
+
+    	<!-- Theme toggle - circle with sun / moon -->
+    	<button id="themeToggle"
+    	  class="w-9 h-9 rounded-full border border-[var(--border-default)]
+    		 bg-[var(--surface-hover)] flex items-center justify-center
+    		 hover:bg-[var(--border-default)] transition"
+    	  title="Toggle light / dark">
+    	  <!-- Sun (shown in dark mode) -->
+    	  <svg id="icon-sun" class="w-4 h-4 hidden dark:block" xmlns="http://www.w3.org/2000/svg"
+    	       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    	       stroke-linecap="round" stroke-linejoin="round">
+    	    <circle cx="12" cy="12" r="4"/>
+    	    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+    	  </svg>
+    	  <!-- Moon (shown in light mode) -->
+    	  <svg id="icon-moon" class="w-4 h-4 block dark:hidden" xmlns="http://www.w3.org/2000/svg"
+    	       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    	       stroke-linecap="round" stroke-linejoin="round">
+    	    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    	  </svg>
+    	</button>
+  </div>
+
+  <div class="p-5 space-y-6 flex-1 overflow-y-auto">
+    <!-- Model selector -->
+    <div class="space-y-2">
+      <label class="text-[10px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+        Model
+      </label>
+      <select id="model"
+        class="w-full rounded-xl border border-[var(--border-default)] bg-[var(--input-bg)]
+               px-3 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-blue-500/40">
+        <option value="nvidia/nemotron-3-ultra-550b-a55b:free">Nemotron 3 Ultra 550B (free)</option>
+        <option value="thinkingmachines/inkling:free">Inkling (free)</option>
+        <option value="poolside/laguna-s-2.1:free">Laguna S 2.1 (free)</option>
+        <option value="nvidia/nemotron-3.5-lightning:free">Nemotron 3.5 Lightning (free)</option>
+        <option value="cohere/north-mini-code:free">North Mini Code (free)</option>
+      </select>
     </div>
 
-    <div class="p-5 space-y-6 flex-1 overflow-y-auto">
-      <!-- Model selector -->
-      <div class="space-y-2">
-        <label class="text-[10px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
-          Model
-        </label>
-        <select id="model"
-          class="w-full rounded-xl border border-[var(--border-default)] bg-[var(--input-bg)]
-                 px-3 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-blue-500/40">
-          <option value="nvidia/nemotron-3-ultra-550b-a55b:free">Nemotron 3 Ultra 550B (free)</option>
-          <option value="thinkingmachines/inkling:free">Inkling (free)</option>
-          <option value="poolside/laguna-s-2.1:free">Laguna S 2.1 (free)</option>
-          <option value="nvidia/nemotron-3.5-lightning:free">Nemotron 3.5 Lightning (free)</option>
-          <option value="cohere/north-mini-code:free">North Mini Code (free)</option>
-        </select>
-      </div>
-
       <!-- Quick actions -->
-      <div class="space-y-2">
+      <div class="space-y-2" id="quick-actions-container">
         <label class="text-[10px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
           Quick actions
         </label>
         <div class="space-y-1.5">
-          <button onclick="sendSuggestion('Explain how a deep neural network works ?')"
+          <button data-suggestion="Explain how a deep neural network works ?"
             class="w-full text-left text-sm px-3 py-2.5 rounded-xl
                    hover:bg-[var(--surface-hover)] text-[var(--text-primary)] transition">
             Explain how a deep neural network works ?
           </button>
-          <button onclick="sendSuggestion('Explain what is the Arbitrage Pricing Theory ?')"
+          <button data-suggestion="Explain what is the Arbitrage Pricing Theory ?"
             class="w-full text-left text-sm px-3 py-2.5 rounded-xl
                    hover:bg-[var(--surface-hover)] text-[var(--text-primary)] transition">
             Explain what is the Arbitrage Pricing Theory ?
           </button>
-          <button onclick="sendSuggestion('Explain how the architecture for an Agent Harness')"
+          <button data-suggestion="Explain how the architecture for an Agent Harness works"
             class="w-full text-left text-sm px-3 py-2.5 rounded-xl
                    hover:bg-[var(--surface-hover)] text-[var(--text-primary)] transition">
             Explain how the architecture for an Agent Harness
@@ -179,43 +179,42 @@
   <!-- ===== CHAT SECTION (right card) ===== -->
   <main class="w-full md:w-3/5 card flex flex-col min-w-0 overflow-hidden">
     <!-- Messages -->
-<div id="messages" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
+    <div id="messages" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
 
-<!-- Input bar – no separator line, ~16% height -->
-<div class="h-[16%] min-h-[80px] p-4 flex items-center">
-  <form id="form" class="w-full max-w-3xl mx-auto relative">
-    <input
-      id="input"
-      type="text"
-      placeholder="Type a message…"
-      autocomplete="off"
-      class="w-full h-14 rounded-2xl border-2 border-[var(--border-default)]
-             bg-[var(--input-bg)] text-[var(--text-primary)]
-             pl-5 pr-14 text-[1.05rem]
-             focus:outline-none focus:ring-2 focus:ring-blue-500/40
-             placeholder:text-[var(--text-secondary)]"
-    />
+    <!-- Input bar – no separator line, ~16% height -->
+    <div class="h-[16%] min-h-[80px] p-4 flex items-center">
+      <form id="form" class="w-full max-w-3xl mx-auto relative">
+        <input
+          id="input"
+          type="text"
+          placeholder="Type a message…"
+          autocomplete="off"
+          class="w-full h-14 rounded-2xl border-2 border-[var(--border-default)]
+                 bg-[var(--input-bg)] text-[var(--text-primary)]
+                 pl-5 pr-14 text-[1.05rem]
+                 focus:outline-none focus:ring-2 focus:ring-blue-500/40
+                 placeholder:text-[var(--text-secondary)]"
+        />
 
-    <!-- Send button inside the input -->
-    <button
-      type="submit"
-      class="absolute right-2 top-1/2 -translate-y-1/2
-             w-10 h-10 rounded-full flex items-center justify-center
-             transition disabled:opacity-50
-             bg-white text-gray-500 border border-gray-200
-             dark:bg-[#2a2a2a] dark:text-white dark:border-[#3a3a3a]
-             hover:bg-gray-50 dark:hover:bg-[#3a3a3a]"
-      title="Send"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-           fill="none" stroke="currentColor" stroke-width="2.5"
-           stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 19V5M5 12l7-7 7 7"/>
-      </svg>
-    </button>
-  </form>
-</div>
-
+        <!-- Send button inside the input -->
+        <button
+          type="submit"
+          class="absolute right-2 top-1/2 -translate-y-1/2
+                 w-10 h-10 rounded-full flex items-center justify-center
+                 transition disabled:opacity-50
+                 bg-white text-gray-500 border border-gray-200
+                 dark:bg-[#2a2a2a] dark:text-white dark:border-[#3a3a3a]
+                 hover:bg-gray-50 dark:hover:bg-[#3a3a3a]"
+          title="Send"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 19V5M5 12l7-7 7 7"/>
+          </svg>
+        </button>
+      </form>
+    </div>
   </main>
 
   <script>
@@ -249,44 +248,37 @@
       }
     ];
 
-function addMessage(role, content) {
-  const wrapper = document.createElement("div");
-  wrapper.className = `flex ${role === "user" ? "justify-end" : "justify-start"}`;
-
-  const div = document.createElement("div");
-  div.className = `max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-    role === "user" ? "msg-user" : "msg-assistant"
-  }`;
-  div.textContent = content;
-
-  wrapper.appendChild(div);
-  messagesEl.appendChild(wrapper);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-  return div;
-}
-
-
-
-    function sendSuggestion(text) {
-      input.value = text;
-      form.dispatchEvent(new Event("submit"));
+    function addMessage(role, content) {
+      const wrapper = document.createElement("div");
+      wrapper.className = `flex ${role === "user" ? "justify-end" : "justify-start"}`;
+    
+      const div = document.createElement("div");
+      div.className = `max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+        role === "user" ? "msg-user" : "msg-assistant"
+      }`;
+      div.textContent = content;
+    
+      wrapper.appendChild(div);
+      messagesEl.appendChild(wrapper);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return div;
     }
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const text = input.value.trim();
+    // 1. Isolate your chat submission logic into a standalone function
+    async function executeChatSubmission(text) {
       if (!text) return;
-
+    
       input.value = "";
       input.disabled = true;
-
+    
       history.push({ role: "user", content: text });
       addMessage("user", text);
-
+    
       const assistantDiv = addMessage("assistant", "…");
       let full = "";
-
+    
       try {
+        // If your backend is on a different port, change this to a full URL like "http://localhost:3000/api/chat"
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -296,25 +288,25 @@ function addMessage(role, content) {
             stream: true,
           }),
         });
-
+    
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
           assistantDiv.textContent = "Error: " + (err.error || res.statusText);
           return;
         }
-
+    
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         let buffer = "";
-
+    
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-
+    
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split("\n");
           buffer = lines.pop() || "";
-
+    
           for (const line of lines) {
             if (line.startsWith("data: ")) {
               const data = line.slice(6).trim();
@@ -331,24 +323,39 @@ function addMessage(role, content) {
             }
           }
         }
-
+        
+        buffer += decoder.decode(); 
         history.push({ role: "assistant", content: full });
-
-        // Simple background-change detection
-        if (/background|gradient|color/i.test(text) &&
-            /linear-gradient|radial-gradient|#[0-9a-f]{3,8}|rgb|hsl/i.test(full)) {
-          const match = full.match(/(linear-gradient\([^)]+\)|radial-gradient\([^)]+\)|#[0-9a-fA-F]{3,8}|rgb[a]?\([^)]+\)|hsl[a]?\([^)]+\))/);
-          if (match) {
-            document.body.style.background = match[0];
-          }
-        }
+    
       } catch (err) {
         assistantDiv.textContent = "Network error: " + err.message;
       } finally {
         input.disabled = false;
         input.focus();
       }
+    }
+    
+    // 2. Handle manual typing in the form
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      executeChatSubmission(text);
     });
+    
+    // 3. Handle quick action clicks seamlessly without triggering form mechanics
+    const quickActions = document.getElementById("quick-actions-container");
+    if (quickActions) {
+      quickActions.addEventListener("click", (e) => {
+        if (input.disabled) return; // Prevent clicking while loading
+        
+        const button = e.target.closest("button[data-suggestion]");
+        if (!button) return;
+    
+        const text = button.getAttribute("data-suggestion");
+        executeChatSubmission(text);
+      });
+    }
+
   </script>
 </body>
 </html>
