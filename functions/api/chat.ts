@@ -17,7 +17,15 @@ export const onRequestPost: PagesFunction<{ OPENROUTER_API_KEY: string }> = asyn
 
   // Simple chain / agent logic here
   const stream = await model.stream([
-    new SystemMessage("You are a helpful assistant."),
+    new SystemMessage(
+      `You are a helpful assistant. 
+      Use First Principles Reasoning Approach to understand User's Goal before answering.
+      Don't use Math Formulas, Just Text, Words or Characters Formulas. 
+      Answer with up to 400 words. 
+      Use bulletpoints, three spaces, horizontal lines, 
+      and lines with up to 80 characters to improve text formatting.
+      `
+    ),
     ...messages.map((m: any) =>
       m.role === "user" ? new HumanMessage(m.content) : m
     ),
