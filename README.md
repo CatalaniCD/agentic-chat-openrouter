@@ -20,6 +20,7 @@ A minimal, streaming chat interface built on **Cloudflare Pages** with **OpenRou
 ├── functions/
 │   └── api/
 │       └── chat.ts         # Cloudflare Pages Function (SSE streaming)
+├── docs/                   # SDLC artifacts (intent, design, plan, test)
 ├── wrangler.toml           # Cloudflare Pages config
 ├── package.json            # Dependencies (wrangler, langchain, streaming-markdown)
 └── .dev.vars               # Local environment variables (gitignored)
@@ -119,6 +120,20 @@ CSS custom properties in `:root` (light) and `.dark` (dark) control all colors. 
 | LLM Provider | OpenRouter (OpenAI-compatible API) |
 | Markdown | `streaming-markdown` (incremental parsing) |
 | Styling | Tailwind CSS (via CDN) + CSS Variables |
+
+## 📚 Documentation
+
+Project artifacts, traced from intent → design → plan → verification:
+
+| Document | Purpose |
+|----------|---------|
+| [docs/intent.md](docs/intent.md) | Why this exists: problem, outcome, constraints, open questions |
+| [docs/design.md](docs/design.md) | Architecture, API contract, data flow, decisions, known gaps |
+| [docs/plan.md](docs/plan.md) | Milestones, AI-native workflow, metrics, risks |
+| [docs/test.md](docs/test.md) | Verification path, test layers, evals, governance |
+
+> Note: `docs/test.md` is currently a proposal — there is no test runner in the
+> repo yet. `npm run dev` + manual browser/`curl` checks are the baseline today.
 
 ## 📄 License
 
